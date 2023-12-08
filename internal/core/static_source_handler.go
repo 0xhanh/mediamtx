@@ -3,9 +3,13 @@ package core
 import (
 	"context"
 	"fmt"
+	"log"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/bluenviron/gortsplib/v4/pkg/base"
 	"github.com/bluenviron/mediamtx/internal/conf"
 	"github.com/bluenviron/mediamtx/internal/defs"
 	"github.com/bluenviron/mediamtx/internal/logger"
@@ -63,6 +67,29 @@ func newStaticSourceHandler(
 	}
 
 	switch {
+	// tunnel:
+	case strings.HasPrefix(cnf.Source, "rtsp://") ||
+		strings.HasPrefix(cnf.Source, "rtsps://"):
+
+		u, tunnelPort, err := ParseUrl(cnf.Source)
+		if tunnelPort > 0 && err == nil {
+			s.instance = &rtspsource.TunnelSource{
+				RtspUrl:        u.String(),
+				TunnelPort:     tunnelPort,
+				ReadTimeout:    readTimeout,
+				WriteTimeout:   writeTimeout,
+				WriteQueueSize: writeQueueSize,
+				Parent:         s,
+			}
+		} else {
+			s.instance = &rtspsource.Source{
+				ReadTimeout:    readTimeout,
+				WriteTimeout:   writeTimeout,
+				WriteQueueSize: writeQueueSize,
+				Parent:         s,
+			}
+		}
+
 	case strings.HasPrefix(cnf.Source, "rtsp://") ||
 		strings.HasPrefix(cnf.Source, "rtsps://"):
 		s.instance = &rtspsource.Source{
@@ -260,4 +287,38 @@ func (s *staticSourceHandler) SetNotReady(req defs.PathSourceStaticSetNotReadyRe
 		<-req.Res
 	case <-s.ctx.Done():
 	}
+}
+
+// tunnel:
+func ParseUrl(rtspUrl string) (*base.URL, uint, error) {
+	URL, err := base.ParseURL(rtspUrl)
+	if err != nil {
+		log.Println("Error parsing rtspUrl: ", rtspUrl)
+		return nil, 0, err
+	}
+
+	queryParams, err := url.ParseQuery(URL.RawQuery)
+	if err != nil {
+		log.Println("Error parsing query parameters:", err)
+		return nil, 0, err
+	}
+
+	// tunnel port
+	var tunnelPort uint
+	if tunnelPortStr := queryParams.Get("tunnelPort"); tunnelPortStr != "" {
+		if tunnel, err := strconv.ParseInt(tunnelPortStr, 10, 0); err == nil {
+			tunnelPort = uint(tunnel)
+			// Modify the URL with updated query parameters
+			URL.RawQuery = removeQueryKey(URL.RawQuery, "tunnelPort")
+		}
+	}
+
+	return URL, tunnelPort, nil
+}
+
+// tunnel:
+func removeQueryKey(rawQuery string, key string) string {
+	queryParams, _ := url.ParseQuery(rawQuery)
+	delete(queryParams, key)
+	return queryParams.Encode()
 }

@@ -29,6 +29,7 @@ require (
 	golang.org/x/crypto v0.16.0
 	golang.org/x/term v0.15.0
 	gopkg.in/yaml.v2 v2.4.0
+	gortsplib-tunnel v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -79,3 +80,7 @@ replace github.com/pion/sdp/v3 => github.com/aler9/sdp/v3 v3.0.0-20231022165400-
 replace github.com/pion/ice/v2 => github.com/aler9/ice/v2 v2.0.0-20231112223552-32d34dfcf3a1
 
 replace github.com/pion/webrtc/v3 => github.com/aler9/webrtc/v3 v3.0.0-20231112223655-e402ed2689c6
+
+// tunnel:
+replace github.com/bluenviron/gortsplib/v4 v4.6.1 => /home//vms/bluenviron/gortsplib
+replace gortsplib-tunnel => /home/hanh/bluenviron/gortsplib-tunnel
