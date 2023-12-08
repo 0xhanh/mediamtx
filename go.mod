@@ -82,5 +82,5 @@ replace github.com/pion/ice/v2 => github.com/aler9/ice/v2 v2.0.0-20231112223552-
 replace github.com/pion/webrtc/v3 => github.com/aler9/webrtc/v3 v3.0.0-20231112223655-e402ed2689c6
 
 // tunnel:
-replace github.com/bluenviron/gortsplib/v4 v4.6.1 => /home//vms/bluenviron/gortsplib
-replace gortsplib-tunnel => /home/hanh/bluenviron/gortsplib-tunnel
+replace github.com/bluenviron/gortsplib/v4 v4.6.1 => /home/vms/bluenviron/gortsplib
+replace gortsplib-tunnel => /home/vms/bluenviron/gortsplib-tunnel
